@@ -1,14 +1,16 @@
 [
   {
     "packageName": "UK.DM.r4",
-    "version": "2.0.14-alpha"
-  },
+    "version": "2.0.14-alpha",
+    "download": true  },
   {
     "packageName": "UK.Spine.r4",
-    "version": "2.0.5-dev"
+    "version": "2.0.5-dev",
+    "url": false
   },
   {
     "packageName": "UK.Core.r4.v2",
-    "version": "2.0.8"
+    "version": "2.0.8",
+    "url": false
   }
 ]
