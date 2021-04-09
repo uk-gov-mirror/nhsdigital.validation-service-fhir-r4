@@ -8,4 +8,6 @@ class FhirValidatorApplication
 
 fun main(args: Array<String>) {
     runApplication<FhirValidatorApplication>(*args)
+
+
 }
