@@ -2,6 +2,7 @@ package com.example.fhirvalidator.service
 
 import com.example.fhirvalidator.util.applyProfile
 import com.example.fhirvalidator.util.getResourcesOfType
+import mu.KLogging
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.CapabilityStatement
 import org.hl7.fhir.utilities.cache.NpmPackage
@@ -12,6 +13,9 @@ class CapabilityStatementApplier(
     implementationGuideParser: ImplementationGuideParser,
     npmPackages: List<NpmPackage>
 ) {
+
+    companion object : KLogging()
+
     private val restResources = npmPackages
         .flatMap { implementationGuideParser.getResourcesOfType(it, CapabilityStatement()) }
         .flatMap { it.rest }

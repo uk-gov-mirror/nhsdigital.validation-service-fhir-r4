@@ -16,6 +16,7 @@ import com.example.fhirvalidator.util.createOperationOutcome
 import mu.KLogging
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome
 import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r4.model.Bundle
 import org.springframework.stereotype.Component
 import java.net.URLDecoder
 import javax.servlet.http.HttpServletRequest
@@ -44,9 +45,7 @@ class ValidateProvider(private val fhirContext: FhirContext,
                 query_pairs[URLDecoder.decode(pair.substring(0, idx), "UTF-8")] = URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
             }
             profile = query_pairs["profile"]
-            logger.info("profile {}", profile )
         }
-        logger.info("profile {}", profile )
         val operationOutcome = parseAndValidateResource(resource, profile)
         val methodOutcome = MethodOutcome()
         methodOutcome.setOperationOutcome(operationOutcome)
@@ -56,20 +55,22 @@ class ValidateProvider(private val fhirContext: FhirContext,
     private fun parseAndValidateResource(resource : IBaseResource, theProfile : String?): IBaseOperationOutcome {
         return try {
 
-
-
-            // Have removed messageDefinition appliers
-            // val messageDefinitionErrors = messageDefinitionApplier.applyMessageDefinition(resource)
-            if (theProfile == null) {
+            if (resource is Bundle && resource.type == Bundle.BundleType.MESSAGE){
+                // EPS MessageDefinition validation logic.
+                val messageDefinitionErrors = messageDefinitionApplier.applyMessageDefinition(resource)
+                capabilityStatementApplier.applyCapabilityStatementProfiles(resource)
+                messageDefinitionErrors ?: validator.validateWithResult(resource).toOperationOutcome()
+            } else if (theProfile == null) {
+                // Go for default profiles which should be in capabilityStatements
                 capabilityStatementApplier.applyCapabilityStatementProfiles(resource)
                 return validator.validateWithResult(resource).toOperationOutcome()
-            } else {
-                theProfile?.let { logger.info("validation resource as $it") }
+            } else  {
+                // Go for supplied profile
+                theProfile?.let { logger.info("applying profile $it") }
                 val validationOptions = ValidationOptions()
                 validationOptions.addProfile(theProfile)
                 return validator.validateWithResult(resource,validationOptions).toOperationOutcome()
             }
-
         } catch (e: DataFormatException) {
             ValidateController.logger.error("Caught parser error", e)
             createOperationOutcome("Invalid JSON", null)
