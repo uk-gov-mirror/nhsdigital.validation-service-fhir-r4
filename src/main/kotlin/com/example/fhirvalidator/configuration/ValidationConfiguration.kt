@@ -64,8 +64,13 @@ class ValidationConfiguration(private val implementationGuideParser: Implementat
             ): IValidationSupport.CodeValidationResult? {
                 val valueSetUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet)
 
+                // KGM same fault with UKCore valueSet
                 if (valueSetUrl == "https://fhir.nhs.uk/ValueSet/DM-MedicationRequest-Code"
-                    || valueSetUrl == "https://fhir.nhs.uk/ValueSet/DM-MedicationDispense-Code") {
+                    || valueSetUrl == "https://fhir.nhs.uk/ValueSet/DM-MedicationDispense-Code"
+                    || valueSetUrl == "https://fhir.nhs.uk/ValueSet/NHSDigital-MedicationRequest-Code"
+                    || valueSetUrl == "https://fhir.nhs.uk/ValueSet/NHSDigital-MedicationDispense-Code"
+                    || valueSetUrl == "https://fhir.hl7.org.uk/ValueSet/UKCore-MedicationCode"
+                    || valueSetUrl == "https://fhir.hl7.org.uk/ValueSet/UKCore-MedicationForm" ) {
                     return IValidationSupport.CodeValidationResult()
                         .setSeverity(IValidationSupport.IssueSeverity.WARNING)
                         .setMessage("Unable to validate medication codes")

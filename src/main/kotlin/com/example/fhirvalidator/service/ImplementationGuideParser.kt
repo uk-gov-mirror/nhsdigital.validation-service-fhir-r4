@@ -2,6 +2,7 @@ package com.example.fhirvalidator.service
 
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport
+import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.utilities.cache.NpmPackage
 import org.springframework.stereotype.Service
@@ -28,6 +29,28 @@ class ImplementationGuideParser(private val fhirContext: FhirContext) {
             .map { npmPackage.load("examples", it) }
             .map(jsonParser::parseResource)
             .filterIsInstance(MessageDefinition::class.java)
+    }
+    fun <T : Resource> getResourceExamples(npmPackage: NpmPackage, resourceType: T): List<T> {
+        val jsonParser = fhirContext.newJsonParser()
+        return npmPackage.list("examples")
+            .map { npmPackage.load("examples", it) }
+            .map(jsonParser::parseResource)
+            .filterIsInstance(resourceType.javaClass)
+    }
+    // Need to remove and rework to use above
+    fun  getPatientExamples(npmPackage: NpmPackage): List<Patient> {
+        val jsonParser = fhirContext.newJsonParser()
+        return npmPackage.list("examples")
+            .map { npmPackage.load("examples", it) }
+            .map(jsonParser::parseResource)
+            .filterIsInstance(Patient::class.java)
+    }
+    fun  getBundleExamples(npmPackage: NpmPackage): List<Bundle> {
+        val jsonParser = fhirContext.newJsonParser()
+        return npmPackage.list("examples")
+            .map { npmPackage.load("examples", it) }
+            .map(jsonParser::parseResource)
+            .filterIsInstance(Bundle::class.java)
     }
 
     fun <T : Resource> getResourcesOfType(npmPackage: NpmPackage, resourceType: T): List<T> {

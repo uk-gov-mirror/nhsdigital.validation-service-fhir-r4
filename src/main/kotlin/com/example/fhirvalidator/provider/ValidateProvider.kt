@@ -2,7 +2,7 @@ package com.example.fhirvalidator.provider
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
-import ca.uhn.fhir.rest.annotation.OptionalParam
+import ca.uhn.fhir.rest.annotation.Operation
 import ca.uhn.fhir.rest.annotation.ResourceParam
 import ca.uhn.fhir.rest.annotation.Validate
 import ca.uhn.fhir.rest.api.MethodOutcome
@@ -28,6 +28,14 @@ class ValidateProvider(private val fhirContext: FhirContext,
                        private val capabilityStatementApplier: CapabilityStatementApplier) {
 
     companion object : KLogging()
+
+    @Operation(name = "\$convert", idempotent = true)
+    @Throws(Exception::class)
+    fun convertJsonOrXml(
+        @ResourceParam resource: IBaseResource?
+    ): IBaseResource? {
+        return resource
+    }
 
     @Validate
     fun validate(theServletRequest : HttpServletRequest, @ResourceParam  resource : IBaseResource,
