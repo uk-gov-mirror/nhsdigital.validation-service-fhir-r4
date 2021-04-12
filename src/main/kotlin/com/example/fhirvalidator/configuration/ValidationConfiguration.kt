@@ -15,7 +15,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.StructureDefinition
-import org.hl7.fhir.utilities.cache.NpmPackage
+import org.hl7.fhir.utilities.npm.NpmPackage
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -30,7 +30,11 @@ class ValidationConfiguration(private val implementationGuideParser: Implementat
 
     @Bean
     fun instanceValidator(supportChain: ValidationSupportChain): FhirInstanceValidator {
-        return FhirInstanceValidator(supportChain)
+        var instanceValidator = FhirInstanceValidator(supportChain)
+        // KM 12/4/2021 Should be tolerant of extra extensions
+        instanceValidator.setAnyExtensionsAllowed(true)
+        instanceValidator.isErrorForUnknownProfiles = false
+        return instanceValidator
     }
 
     @Bean

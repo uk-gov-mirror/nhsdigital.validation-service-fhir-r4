@@ -4,9 +4,9 @@ import com.example.fhirvalidator.model.SimplifierPackage
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KLogging
 import org.hl7.fhir.exceptions.FHIRException
-import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager
-import org.hl7.fhir.utilities.cache.NpmPackage
-import org.hl7.fhir.utilities.cache.ToolsVersion
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager
+import org.hl7.fhir.utilities.npm.NpmPackage
+import org.hl7.fhir.utilities.npm.ToolsVersion
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource

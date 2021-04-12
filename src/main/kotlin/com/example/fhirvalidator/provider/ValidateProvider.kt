@@ -66,7 +66,11 @@ class ValidateProvider(private val fhirContext: FhirContext,
             if (resource is Bundle && resource.type == Bundle.BundleType.MESSAGE){
                 // EPS MessageDefinition validation logic.
                 val messageDefinitionErrors = messageDefinitionApplier.applyMessageDefinition(resource)
-                capabilityStatementApplier.applyCapabilityStatementProfiles(resource)
+                resource.entry.forEach{
+                    if (it.hasResource() && (!it.resource.hasMeta() || !it.resource.meta.hasProfile())) {
+                        capabilityStatementApplier.applyCapabilityStatementProfiles(it.resource)
+                    }
+                }
                 messageDefinitionErrors ?: validator.validateWithResult(resource).toOperationOutcome()
             } else if (theProfile == null) {
                 // Go for default profiles which should be in capabilityStatements

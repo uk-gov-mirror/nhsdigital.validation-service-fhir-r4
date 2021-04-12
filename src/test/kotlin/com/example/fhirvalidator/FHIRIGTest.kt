@@ -4,14 +4,12 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.LenientErrorHandler
 import ca.uhn.fhir.parser.StrictErrorHandler
 import com.example.fhirvalidator.service.ImplementationGuideParser
+import com.example.fhirvalidator.util.getResourcesOfType
 import mu.KLogging
 import org.assertj.core.api.Assertions
 import org.hl7.fhir.instance.model.api.IBaseResource
-import org.hl7.fhir.r4.model.Bundle
-import org.hl7.fhir.r4.model.MessageDefinition
-import org.hl7.fhir.r4.model.OperationOutcome
-import org.hl7.fhir.r4.model.Patient
-import org.hl7.fhir.utilities.cache.NpmPackage
+import org.hl7.fhir.r4.model.*
+import org.hl7.fhir.utilities.npm.NpmPackage
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -38,45 +36,6 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
         ctx.setParserErrorHandler(strictErrorHandler)
     }
 
-    private fun validateResource(json: String,mediaType :  MediaType ): ResponseEntity<*>? {
-        val headers = HttpHeaders()
-        headers.contentType = mediaType
-        val entity = HttpEntity<Any>(json, headers)
-        return restTemplate.exchange(
-            "http://localhost:$port/R4/\$validate", HttpMethod.POST, entity,
-            String::class.java
-        )
-    }
-
-
-    private fun patientResourceFromNpm(packageName : String) : List<Patient> {
-        return npmPackages.filter { it.name().equals(packageName) }
-            .flatMap { implementationGuideParser.getPatientExamples(it) }
-    }
-    private fun messageDefinitionResourceFromNpm(packageName : String) : List<MessageDefinition> {
-        return npmPackages.filter { it.name().equals(packageName) }
-            .flatMap { implementationGuideParser.getMessageDefinitions(it) }
-    }
-
-    private fun bundleResourceFromNpm(packageName : String) : List<Bundle> {
-        return npmPackages.filter { it.name().equals(packageName) }
-            .flatMap { implementationGuideParser.getBundleExamples(it) }
-    }
-
-    private fun getResource(response : ResponseEntity<*>?): IBaseResource? {
-        if (response != null && response.body != null && response.body is String) {
-            return ctx.newJsonParser().parseResource(response.body as String?)
-        }
-      return null
-    }
-
-    private fun hasErrors(operationOutcome: OperationOutcome) : Boolean {
-        operationOutcome.issue.forEach{
-            if (it.severity == OperationOutcome.IssueSeverity.ERROR) return true
-        }
-        return false
-    }
-
     @Test
     @Throws(Exception::class)
     fun metadataShouldReturnCapabilityStatement() {
@@ -89,10 +48,10 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
         ).contains("CapabilityStatement")
     }
 
-    @Test
-    fun validateNHSDigitalPatientExamples() {
-        validatePatient("uk.nhsdigital.r4")
-    }
+    //
+    //  NHS Digital Medicines - EPS Tests
+    //
+
 
     @Test
     fun validateNHSDigitalMedicinesPatientExamples() {
@@ -101,23 +60,140 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
 
     @Test
     fun validateNHSDigitalMedicinesMessageDefinitionsExamples() {
-        messageDefinitionResourceFromNpm("uk.nhsdigital.medicines.r4")
+        resourceFromNpm("uk.nhsdigital.medicines.r4", MessageDefinition())
             .forEach{
             validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
             }
     }
 
     @Test
-    fun validateNHSDigitalBundleExamples() {
-        bundleResourceFromNpm("uk.nhsdigital.medicines.r4")
+    fun validateNHSDigitalMedicinesBundleExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4",Bundle())
             .forEach{
                 validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
             }
     }
 
+    @Test
+    fun validateNHSDigitalMedicinesMedicationRequestExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,MedicationRequest()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalMedicinesMedicationDispenseExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,MedicationDispense()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalMedicinesMedicationExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,Medication()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesClaimExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,Claim()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesTaskExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,Task()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    //
+    //  NHS Digital Medicines - EPS Tests
+    //
+
+    @Test
+    fun validateNHSDigitalPatientExamples() {
+        validatePatient("uk.nhsdigital.r4")
+    }
+
+    @Test
+    fun validateNHSDigitalPractitionerExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Practitioner()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalPractitionerRoleExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,PractitionerRole()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalOrganizationExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Organization()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalHealthcareServiceExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,HealthcareService()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+
+
+    @Test
+    fun validateNHSDigitalLocationExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Location()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalCommunicationRequestExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,CommunicationRequest()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    /*
+    @Test
+    fun validateNHSDigitalBundleExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Bundle()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalEndpointExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Endpoint()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalDeviceExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Device()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+*/
+
+
     fun validatePatient(packageName: String) {
-        patientResourceFromNpm(packageName).forEach{
-           validateResourceGeneric(packageName,it)
+        resourceFromNpm(packageName,Patient()).forEach{
+            validateResourceGeneric(packageName,it)
         }
     }
 
@@ -131,10 +207,43 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
             if (hasErrors(responseResource)) {
                 logger.error("{} Errors found. Example {}", packageName, resource.idElement.idPart)
                 logger.info("{}", ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseResource))
+
             } else {
                 logger.info("{} Validated OK Example {}", packageName, resource.idElement.idPart)
             }
+            Assertions.assertThat(hasErrors(responseResource)).isEqualTo(false)
         }
     }
+
+    private fun validateResource(json: String,mediaType :  MediaType ): ResponseEntity<*>? {
+        val headers = HttpHeaders()
+        headers.contentType = mediaType
+        val entity = HttpEntity<Any>(json, headers)
+        return restTemplate.exchange(
+            "http://localhost:$port/R4/\$validate", HttpMethod.POST, entity,
+            String::class.java
+        )
+    }
+
+    private fun <T : Resource> resourceFromNpm(packageName : String, resourceType: T) : List<T> {
+        return npmPackages.filter { it.name().equals(packageName) }
+            .flatMap { implementationGuideParser.getResourceExamples(it,resourceType ) }
+    }
+
+
+    private fun getResource(response : ResponseEntity<*>?): IBaseResource? {
+        if (response != null && response.body != null && response.body is String) {
+            return ctx.newJsonParser().parseResource(response.body as String?)
+        }
+        return null
+    }
+
+    private fun hasErrors(operationOutcome: OperationOutcome) : Boolean {
+        operationOutcome.issue.forEach{
+            if (it.severity == OperationOutcome.IssueSeverity.ERROR) return true
+        }
+        return false
+    }
+
 
 }
