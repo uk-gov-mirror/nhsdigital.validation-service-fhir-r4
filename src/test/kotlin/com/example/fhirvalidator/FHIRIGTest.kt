@@ -1,7 +1,6 @@
 package com.example.fhirvalidator
 
 import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.parser.LenientErrorHandler
 import ca.uhn.fhir.parser.StrictErrorHandler
 import com.example.fhirvalidator.service.ImplementationGuideParser
 import com.example.fhirvalidator.util.getResourcesOfType
@@ -115,6 +114,14 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
     fun validateNHSDigitalMedicinesCommunicationRequestExamples() {
         val packageName = "uk.nhsdigital.medicines.r4"
         resourceFromNpm(packageName,CommunicationRequest()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesImmunizationExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,Immunization()).forEach{
             validateResourceGeneric(packageName,it)
         }
     }
