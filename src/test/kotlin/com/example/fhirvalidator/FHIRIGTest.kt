@@ -203,6 +203,118 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
     //
 
     @Test
+    fun validateNHSDigitalCodeSystemsExamples() {
+        conformanceResourceFromNpm("uk.nhsdigital.r4",CodeSystem())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.r4",it)
+            }
+    }
+    @Test
+    fun validateNHSDigitalValueSetExamples() {
+        conformanceResourceFromNpm("uk.nhsdigital.r4",ValueSet())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.r4",it)
+            }
+    }
+
+    @Test
+    fun validateNHSDigitalBundleExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Bundle()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalCarePlanExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,CarePlan()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+    @Test
+    fun validateNHSDigitalCareTeamExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,CareTeam()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalCommunicationRequestExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,CommunicationRequest()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalDeviceExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Device()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+
+    @Test
+    fun validateNHSDigitalEndpointExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Endpoint()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalHealthcareServiceExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,HealthcareService()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalLocationExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Location()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMessageDefinitionExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,MessageDefinition()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMessageHeaderExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,MessageHeader()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalObservationDefinitionExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,ObservationDefinition()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalOrganizationExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Organization()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+
+    @Test
     fun validateNHSDigitalPatientExamples() {
         val packageName = "uk.nhsdigital.r4"
         resourceFromNpm(packageName,Patient()).forEach{
@@ -224,60 +336,8 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
             validateResourceGeneric(packageName,it)
         }
     }
-    @Test
-    fun validateNHSDigitalOrganizationExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,Organization()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-    @Test
-    fun validateNHSDigitalHealthcareServiceExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,HealthcareService()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
 
 
-
-    @Test
-    fun validateNHSDigitalLocationExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,Location()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-    @Test
-    fun validateNHSDigitalCommunicationRequestExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,CommunicationRequest()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-    /*
-    @Test
-    fun validateNHSDigitalBundleExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,Bundle()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-    @Test
-    fun validateNHSDigitalEndpointExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,Endpoint()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-    @Test
-    fun validateNHSDigitalDeviceExamples() {
-        val packageName = "uk.nhsdigital.r4"
-        resourceFromNpm(packageName,Device()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-*/
 
 
     fun validateResourceGeneric(packageName: String, resource :IBaseResource) {
