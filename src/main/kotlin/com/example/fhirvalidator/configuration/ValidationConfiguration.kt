@@ -31,7 +31,7 @@ class ValidationConfiguration(private val implementationGuideParser: Implementat
     @Bean
     fun instanceValidator(supportChain: ValidationSupportChain): FhirInstanceValidator {
         var instanceValidator = FhirInstanceValidator(supportChain)
-        // KM 12/4/2021 Should be tolerant of extra extensions
+        // KM 12/4/2021 Should be tolerant of extra extensions and profiles
         instanceValidator.setAnyExtensionsAllowed(true)
         instanceValidator.isErrorForUnknownProfiles = false
         return instanceValidator

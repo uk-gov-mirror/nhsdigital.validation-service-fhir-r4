@@ -32,8 +32,6 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
 
     init {
         ctx = FhirContext.forR4()
-        val strictErrorHandler = StrictErrorHandler()
-        ctx.setParserErrorHandler(strictErrorHandler)
     }
 
     @Test
@@ -48,21 +46,52 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
         ).contains("CapabilityStatement")
     }
 
+    // Strucutre checks
+
+    @Test
+    fun validateNpmNHSDigitalMedicinesStructure(){
+        val npm = npmPackages.filter { npmList -> npmList.name().equals("uk.nhsdigital.medicines.r4") }
+        val jsonParser = ctx.newJsonParser().setParserErrorHandler(StrictErrorHandler())
+        npm.forEach{ npm ->
+            val files = npm.list("examples")
+            files.forEach{ fileName ->
+                logger.info("{}",fileName)
+                val file = npm.load("examples",fileName)
+                jsonParser.parseResource(file)
+            }
+        }
+    }
+
+    @Test
+    fun validateNpmNHSDigitalStructure(){
+        val npm = npmPackages.filter { npmList -> npmList.name().equals("uk.nhsdigital.r4") }
+        val jsonParser = ctx.newJsonParser().setParserErrorHandler(StrictErrorHandler())
+        npm.forEach{ npm ->
+            val files = npm.list("examples")
+            files.forEach{ fileName ->
+                logger.info("{}",fileName)
+                val file = npm.load("examples",fileName)
+                jsonParser.parseResource(file)
+            }
+        }
+    }
+
     //
     //  NHS Digital Medicines - EPS Tests
     //
 
-
     @Test
-    fun validateNHSDigitalMedicinesPatientExamples() {
-        validatePatient("uk.nhsdigital.medicines.r4")
-    }
-
-    @Test
-    fun validateNHSDigitalMedicinesMessageDefinitionsExamples() {
-        resourceFromNpm("uk.nhsdigital.medicines.r4", MessageDefinition())
+    fun validateNHSDigitalMedicinesCodeSystemsExamples() {
+        conformanceResourceFromNpm("uk.nhsdigital.medicines.r4",CodeSystem())
             .forEach{
-            validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
+    }
+    @Test
+    fun validateNHSDigitalMedicinesValueSetExamples() {
+        conformanceResourceFromNpm("uk.nhsdigital.medicines.r4",ValueSet())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
             }
     }
 
@@ -72,6 +101,30 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
             .forEach{
                 validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
             }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesClaimExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,Claim()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesCommunicationRequestExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,CommunicationRequest()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesListExamples() {
+        val packageName = "uk.nhsdigital.medicines.r4"
+        resourceFromNpm(packageName,ListResource()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
     }
 
     @Test
@@ -97,11 +150,44 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
     }
 
     @Test
-    fun validateNHSDigitalMedicinesClaimExamples() {
-        val packageName = "uk.nhsdigital.medicines.r4"
-        resourceFromNpm(packageName,Claim()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
+    fun validateNHSDigitalMedicinesMessageDefinitionsExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4", MessageDefinition())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesMessageHeaderExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4", MessageHeader())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
+    }
+
+    @Test
+    fun validateNHSDigitalMedicinesPatientExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4", Patient())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
+    }
+    /* Verify a different way as the $validate takes parameter parameters
+    @Test
+    fun validateNHSDigitalMedicinesParametersExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4", Parameters())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
+    }
+
+     */
+    @Test
+    fun validateNHSDigitalMedicinesProvenanceExamples() {
+        resourceFromNpm("uk.nhsdigital.medicines.r4", Provenance())
+            .forEach{
+                validateResourceGeneric("uk.nhsdigital.medicines.r4",it)
+            }
     }
 
     @Test
@@ -118,7 +204,10 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
 
     @Test
     fun validateNHSDigitalPatientExamples() {
-        validatePatient("uk.nhsdigital.r4")
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,Patient()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
     }
 
     @Test
@@ -191,12 +280,6 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
 */
 
 
-    fun validatePatient(packageName: String) {
-        resourceFromNpm(packageName,Patient()).forEach{
-            validateResourceGeneric(packageName,it)
-        }
-    }
-
     fun validateResourceGeneric(packageName: String, resource :IBaseResource) {
         var response = validateResource(ctx.newJsonParser().encodeResourceToString(resource),
             MediaType.APPLICATION_JSON)
@@ -229,6 +312,14 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
         return npmPackages.filter { it.name().equals(packageName) }
             .flatMap { implementationGuideParser.getResourceExamples(it,resourceType ) }
     }
+
+    private fun <T : Resource> conformanceResourceFromNpm(packageName : String, resourceType: T) : List<T> {
+        return npmPackages.filter { it.name().equals(packageName) }
+            .flatMap { implementationGuideParser.getResourcesOfType(it,resourceType ) }
+    }
+
+
+
 
 
     private fun getResource(response : ResponseEntity<*>?): IBaseResource? {

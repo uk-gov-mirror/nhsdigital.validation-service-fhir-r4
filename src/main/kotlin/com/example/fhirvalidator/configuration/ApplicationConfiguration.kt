@@ -1,16 +1,15 @@
 package com.example.fhirvalidator.configuration
 
 import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.parser.LenientErrorHandler
-import com.example.fhirvalidator.server.FHIRRestfulServer
+import ca.uhn.fhir.parser.StrictErrorHandler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.servlet.ServletRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.context.support.GenericWebApplicationContext
 import javax.servlet.Servlet
+import com.example.fhirvalidator.server.FHIRRestfulServer
 
 @Configuration
 class ApplicationConfiguration {
@@ -21,10 +20,11 @@ class ApplicationConfiguration {
 
     @Bean
     fun fhirContext(): FhirContext {
-        val lenientErrorHandler = LenientErrorHandler()
-        lenientErrorHandler.isErrorOnInvalidValue = false
+        // IG is no l
+        val strictErrorHandler = StrictErrorHandler()
+        ///lenientErrorHandler.isErrorOnInvalidValue = false
         val fhirContext = FhirContext.forR4()
-        fhirContext.setParserErrorHandler(lenientErrorHandler)
+        fhirContext.setParserErrorHandler(strictErrorHandler)
         return fhirContext
     }
 
