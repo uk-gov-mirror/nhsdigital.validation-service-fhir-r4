@@ -24,20 +24,20 @@ class PackageConfiguration(val objectMapper: ObjectMapper) {
     fun getPackages(): List<NpmPackage> {
         val inputStream = ClassPathResource("manifest.json").inputStream
         val packages = objectMapper.readValue(inputStream, Array<SimplifierPackage>::class.java)
-        try {
-            return Arrays.stream(packages)
+        var packageList : MutableList<NpmPackage> = ArrayList<NpmPackage>();
+        packageList.addAll(Arrays.stream(packages)
+            .filter{it.download == false}
+            .map { "${it.packageName}-${it.version}.tgz" }
+            .map { ClassPathResource(it).inputStream }
+            .map { NpmPackage.fromPackage(it) }
+            .toList())
+        val pcm = FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        packageList.addAll(Arrays.stream(packages)
+                .filter{it.download == true}
+                .map { getGetPackage(pcm, it.packageName,  it.version, it.download) }
+                .toList())
 
-                    .map { "${it.packageName}-${it.version}.tgz" }
-                    .map { ClassPathResource(it).inputStream }
-                    .map { NpmPackage.fromPackage(it) }
-                    .toList()
-        } catch (ex :FileNotFoundException) {
-                println("oopsie")
-            val pcm = FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
-            return Arrays.stream(packages)
-                    .map { getGetPackage(pcm, it.packageName,  it.version, it.download) }
-                    .toList()
-        }
+        return packageList
     }
 
     fun getGetPackage(pcm : FilesystemPackageCacheManager, packageName : String, version : String, download : Boolean? ) : NpmPackage {
