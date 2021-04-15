@@ -17,9 +17,9 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
-                 @Autowired val npmPackages: List<NpmPackage>,
-                 @Autowired val implementationGuideParser: ImplementationGuideParser) {
+class FHIRSimplifierImplementationGuideTest(@Autowired val restTemplate: TestRestTemplate,
+                                            @Autowired val npmPackages: List<NpmPackage>,
+                                            @Autowired val implementationGuideParser: ImplementationGuideParser) {
 
 
     @LocalServerPort
@@ -308,6 +308,14 @@ class FHIRIGTest(@Autowired val restTemplate: TestRestTemplate,
     fun validateNHSDigitalObservationDefinitionExamples() {
         val packageName = "uk.nhsdigital.r4"
         resourceFromNpm(packageName,ObservationDefinition()).forEach{
+            validateResourceGeneric(packageName,it)
+        }
+    }
+
+    @Test
+    fun validateNHSDigitalOperationOutcomeExamples() {
+        val packageName = "uk.nhsdigital.r4"
+        resourceFromNpm(packageName,OperationOutcome()).forEach{
             validateResourceGeneric(packageName,it)
         }
     }
