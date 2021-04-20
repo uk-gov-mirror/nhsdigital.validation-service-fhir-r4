@@ -40,6 +40,15 @@ class ImplementationGuideParser(private val fhirContext: FhirContext) {
     fun <T : Resource> getResourceExamples(npmPackage: NpmPackage, resourceType: T): List<T> {
         // Note use of StrictErrorHandler
         val jsonParser = fhirContext.newJsonParser().setParserErrorHandler(StrictErrorHandler())
+        /*
+        Move this into testing the IG
+        npmPackage.list("examples").forEach {
+            logger.info { it }
+            val inputStream = npmPackage.load("examples", it)
+            val resource = jsonParser.parseResource(inputStream)
+        }
+
+         */
         return npmPackage.list("examples")
             .map { npmPackage.load("examples", it) }
             .map(jsonParser::parseResource)

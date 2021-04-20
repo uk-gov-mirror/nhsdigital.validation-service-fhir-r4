@@ -42,6 +42,15 @@ class FhirValidatorApplicationTests(@Autowired val restTemplate: TestRestTemplat
         return ctx.newXmlParser().parseResource(reader)
     }
 
+    private fun getFileResourceJSON(fileName: String): IBaseResource? {
+        val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(
+            "FHIRExamples/$fileName"
+        )
+        Assertions.assertThat(inputStream != null).isEqualTo(true)
+        val reader: Reader = InputStreamReader(inputStream)
+        return ctx.newJsonParser().parseResource(reader)
+    }
+
     private fun validateResource(json: String,mediaType :  MediaType ): ResponseEntity<*>? {
         val headers = HttpHeaders()
         headers.contentType = mediaType
@@ -81,6 +90,24 @@ class FhirValidatorApplicationTests(@Autowired val restTemplate: TestRestTemplat
             Assertions.assertThat(hasErrors(responseResource)).isEqualTo(true)
         }
     }
+
+    @Test
+    @Throws(Exception::class)
+    fun validateMedicationRequestDuplicateMedicationReferences() {
+
+        val resource = getFileResourceJSON("MedicationRequest-bothMedicationReferenceAndCodeableConcept.json")
+        val out: ResponseEntity<*>? =
+            validateResource(ctx.newJsonParser().encodeResourceToString(resource), MediaType.APPLICATION_JSON)
+
+        Assertions.assertThat(out).isNotNull
+        val responseResource = getResource(out)
+        Assertions.assertThat(responseResource).isInstanceOf(OperationOutcome::class.java)
+        if (responseResource is OperationOutcome) {
+
+            Assertions.assertThat(hasErrors(responseResource)).isEqualTo(true)
+        }
+    }
+
     @Test
     fun contextLoads() {
     }
